@@ -1,8 +1,6 @@
 import { useState } from "react"
 import Icon from "@/components/ui/icon"
 
-type IconName = string
-
 const initiatives = [
   {
     id: 1,
@@ -75,8 +73,149 @@ const mapPins = [
   { id: 5, type: "event", x: 75, y: 52 },
 ]
 
+const levels = [
+  { level: 1, name: "Наблюдатель", minPoints: 0, color: "text-slate-400", bg: "bg-slate-500/20" },
+  { level: 2, name: "Участник", minPoints: 100, color: "text-green-400", bg: "bg-green-500/20" },
+  { level: 3, name: "Активист", minPoints: 300, color: "text-blue-400", bg: "bg-blue-500/20" },
+  { level: 4, name: "Организатор", minPoints: 700, color: "text-violet-400", bg: "bg-violet-500/20" },
+  { level: 5, name: "Лидер района", minPoints: 1500, color: "text-amber-400", bg: "bg-amber-500/20" },
+]
+
+const userHistory = [
+  { id: 1, title: "Субботник у школы №47", type: "event", role: "Волонтёр", points: 50, date: "20 мар" },
+  { id: 2, title: "Ремонт качели во дворе дома 15", type: "fundraising", role: "Спонсор", points: 80, date: "15 мар" },
+  { id: 3, title: "Высадка деревьев в сквере Мира", type: "volunteers", role: "Волонтёр", points: 50, date: "10 мар" },
+  { id: 4, title: "Замена освещения в подъезде №3", type: "fundraising", role: "Организатор", points: 120, date: "5 мар" },
+  { id: 5, title: "Уборка набережной", type: "volunteers", role: "Волонтёр", points: 50, date: "28 фев" },
+]
+
+const userPoints = 850
+const currentLevel = levels.find(l => l.level === 4)!
+const nextLevel = levels.find(l => l.level === 5)!
+const progressToNext = ((userPoints - currentLevel.minPoints) / (nextLevel.minPoints - currentLevel.minPoints)) * 100
+
+function ProfileScreen() {
+  return (
+    <div className="h-full overflow-y-auto pb-24">
+      {/* Шапка профиля */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-violet-900/40 to-transparent px-4 pt-6 pb-4">
+        <div className="flex items-start gap-4">
+          <div className="relative flex-shrink-0">
+            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+              АК
+            </div>
+            <div className={`absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full ${currentLevel.bg} border-2 border-background`}>
+              <span className={`text-xs font-bold ${currentLevel.color}`}>{currentLevel.level}</span>
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-bold text-foreground">Александр Козлов</h2>
+            <div className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${currentLevel.bg} ${currentLevel.color}`}>
+              <Icon name="Star" size={11} />
+              {currentLevel.name}
+            </div>
+            <p className="mt-1.5 text-xs text-foreground/50 flex items-center gap-1">
+              <Icon name="MapPin" size={11} />
+              Москва, Хамовники
+            </p>
+          </div>
+        </div>
+
+        {/* Прогресс до следующего уровня */}
+        <div className="mt-5 rounded-2xl bg-card border border-border p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-foreground/60">Очки активности</span>
+            <span className="text-xs font-semibold text-foreground">{userPoints} / {nextLevel.minPoints}</span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-400 transition-all"
+              style={{ width: `${progressToNext}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <span className={`text-[11px] font-medium ${currentLevel.color}`}>{currentLevel.name}</span>
+            <span className="text-[11px] text-foreground/40">
+              до «{nextLevel.name}» — {nextLevel.minPoints - userPoints} очков
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Статистика */}
+      <div className="px-4 mt-1">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: "Инициатив", value: "3", icon: "Lightbulb", color: "text-violet-400" },
+            { label: "Участий", value: "12", icon: "CheckCircle", color: "text-green-400" },
+            { label: "Взносов", value: "2 400 ₽", icon: "Heart", color: "text-red-400" },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-2xl bg-card border border-border p-3 flex flex-col items-center gap-1.5">
+              <Icon name={stat.icon} size={18} className={stat.color} />
+              <span className="text-base font-bold text-foreground">{stat.value}</span>
+              <span className="text-[10px] text-foreground/50 text-center leading-tight">{stat.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Достижения */}
+      <div className="px-4 mt-4">
+        <h3 className="mb-3 text-sm font-semibold text-foreground">Достижения</h3>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {[
+            { icon: "Sprout", label: "Первый шаг", unlocked: true },
+            { icon: "Flame", label: "Активист", unlocked: true },
+            { icon: "TreePine", label: "Эколог", unlocked: true },
+            { icon: "Trophy", label: "Топ района", unlocked: false },
+            { icon: "Crown", label: "Легенда", unlocked: false },
+          ].map((badge) => (
+            <div
+              key={badge.label}
+              className={`flex-shrink-0 flex flex-col items-center gap-1.5 rounded-2xl p-3 border w-16 ${
+                badge.unlocked
+                  ? "bg-violet-600/15 border-violet-500/30"
+                  : "bg-secondary border-border opacity-40"
+              }`}
+            >
+              <Icon name={badge.icon} size={20} className={badge.unlocked ? "text-violet-400" : "text-foreground/30"} />
+              <span className="text-[9px] text-center leading-tight text-foreground/60">{badge.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* История участия */}
+      <div className="px-4 mt-4">
+        <h3 className="mb-3 text-sm font-semibold text-foreground">История участия</h3>
+        <div className="flex flex-col gap-2">
+          {userHistory.map((item) => {
+            const config = typeConfig[item.type as keyof typeof typeConfig]
+            return (
+              <div key={item.id} className="flex items-center gap-3 rounded-2xl bg-card border border-border px-3 py-3">
+                <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl ${config.color}`}>
+                  <Icon name={config.icon} size={16} className="text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
+                  <p className="text-[11px] text-foreground/50">{item.role} · {item.date}</p>
+                </div>
+                <div className="flex items-center gap-1 rounded-full bg-violet-600/15 px-2 py-1">
+                  <Icon name="Zap" size={10} className="text-violet-400" />
+                  <span className="text-[11px] font-bold text-violet-400">+{item.points}</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Index() {
-  const [activeTab, setActiveTab] = useState<"map" | "feed">("map")
+  const [activeScreen, setActiveScreen] = useState<"map" | "feed" | "profile">("map")
+  const [activeMapTab, setActiveMapTab] = useState<"map" | "feed">("map")
   const [selectedPin, setSelectedPin] = useState<number | null>(null)
   const [showNewInitiative, setShowNewInitiative] = useState(false)
 
@@ -98,7 +237,7 @@ export default function Index() {
           <Icon name="ChevronDown" size={12} className="text-foreground/50" />
         </button>
 
-        <div className="flex items-center gap-1">
+        <button onClick={() => setActiveScreen("profile")} className="flex items-center gap-1">
           <div className="relative">
             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-sm font-bold">
               АК
@@ -107,40 +246,53 @@ export default function Index() {
               4
             </div>
           </div>
-        </div>
+        </button>
       </div>
 
-      {/* Вкладки */}
-      <div className="relative z-10 flex bg-background border-b border-border">
-        <button
-          onClick={() => setActiveTab("map")}
-          className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === "map" ? "text-violet-400 border-b-2 border-violet-500" : "text-foreground/50"
-          }`}
-        >
-          <Icon name="Map" size={15} />
-          Карта
-        </button>
-        <button
-          onClick={() => setActiveTab("feed")}
-          className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === "feed" ? "text-violet-400 border-b-2 border-violet-500" : "text-foreground/50"
-          }`}
-        >
-          <Icon name="LayoutList" size={15} />
-          Лента
-        </button>
-      </div>
+      {/* Вкладки (только не на профиле) */}
+      {activeScreen !== "profile" && (
+        <div className="relative z-10 flex bg-background border-b border-border">
+          <button
+            onClick={() => { setActiveScreen("map"); setActiveMapTab("map") }}
+            className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors ${
+              activeScreen === "map" && activeMapTab === "map" ? "text-violet-400 border-b-2 border-violet-500" : "text-foreground/50"
+            }`}
+          >
+            <Icon name="Map" size={15} />
+            Карта
+          </button>
+          <button
+            onClick={() => { setActiveScreen("map"); setActiveMapTab("feed") }}
+            className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors ${
+              activeMapTab === "feed" && activeScreen !== "profile" ? "text-violet-400 border-b-2 border-violet-500" : "text-foreground/50"
+            }`}
+          >
+            <Icon name="LayoutList" size={15} />
+            Лента
+          </button>
+        </div>
+      )}
+
+      {/* Профиль — заголовок */}
+      {activeScreen === "profile" && (
+        <div className="relative z-10 flex items-center gap-2 bg-background border-b border-border px-4 py-3">
+          <button onClick={() => setActiveScreen("map")} className="text-foreground/60">
+            <Icon name="ChevronLeft" size={22} />
+          </button>
+          <span className="text-sm font-semibold text-foreground">Мой профиль</span>
+        </div>
+      )}
 
       {/* Основной контент */}
       <div className="relative flex-1 overflow-hidden">
 
+        {/* ПРОФИЛЬ */}
+        {activeScreen === "profile" && <ProfileScreen />}
+
         {/* КАРТА */}
-        {activeTab === "map" && (
+        {activeScreen === "map" && activeMapTab === "map" && (
           <div className="relative h-full w-full">
-            {/* Имитация карты */}
             <div className="absolute inset-0 bg-[#1a2332]">
-              {/* Улицы */}
               <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <line x1="0" y1="35" x2="100" y2="35" stroke="#3a4a6a" strokeWidth="1.5" />
                 <line x1="0" y1="65" x2="100" y2="65" stroke="#3a4a6a" strokeWidth="1" />
@@ -155,23 +307,17 @@ export default function Index() {
                 <rect x="5" y="37" width="22" height="26" fill="#243050" rx="1" />
                 <rect x="72" y="37" width="22" height="26" fill="#243050" rx="1" />
               </svg>
-              {/* Река */}
               <div className="absolute" style={{ left: "5%", top: "78%", width: "90%", height: "12%", background: "linear-gradient(180deg, #1e3a5f 0%, #162d4a 100%)", borderRadius: "40%", opacity: 0.7 }} />
-              <div className="absolute text-[10px] text-blue-300/50 font-medium" style={{ left: "40%", top: "82%" }}>
-                р. Москва
-              </div>
+              <div className="absolute text-[10px] text-blue-300/50 font-medium" style={{ left: "40%", top: "82%" }}>р. Москва</div>
 
-              {/* Метка центра */}
               <div className="absolute flex items-center justify-center" style={{ left: "48%", top: "47%", transform: "translate(-50%, -50%)" }}>
                 <div className="h-3 w-3 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
                   <div className="h-1.5 w-1.5 rounded-full bg-violet-400" />
                 </div>
               </div>
 
-              {/* Пины инициатив */}
               {mapPins.map((pin) => {
                 const config = typeConfig[pin.type as keyof typeof typeConfig]
-                const initiative = initiatives.find(i => i.id === pin.id)
                 return (
                   <button
                     key={pin.id}
@@ -187,7 +333,6 @@ export default function Index() {
                 )
               })}
 
-              {/* Попап при нажатии на пин */}
               {selectedPin && (() => {
                 const pin = mapPins.find(p => p.id === selectedPin)!
                 const initiative = initiatives.find(i => i.id === selectedPin)!
@@ -195,11 +340,7 @@ export default function Index() {
                 return (
                   <div
                     className="absolute z-20 w-56 rounded-2xl bg-card border border-border p-3 shadow-2xl"
-                    style={{
-                      left: `${Math.min(Math.max(pin.x, 20), 75)}%`,
-                      top: `${Math.max(pin.y - 35, 5)}%`,
-                      transform: "translateX(-50%)"
-                    }}
+                    style={{ left: `${Math.min(Math.max(pin.x, 20), 75)}%`, top: `${Math.max(pin.y - 35, 5)}%`, transform: "translateX(-50%)" }}
                   >
                     <div className="flex items-start gap-2 mb-2">
                       <div className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${config.color}`}>
@@ -210,24 +351,16 @@ export default function Index() {
                     {initiative.goal > 0 && (
                       <div className="mb-2">
                         <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-red-500"
-                            style={{ width: `${(initiative.collected / initiative.goal) * 100}%` }}
-                          />
+                          <div className="h-full rounded-full bg-red-500" style={{ width: `${(initiative.collected / initiative.goal) * 100}%` }} />
                         </div>
-                        <p className="mt-1 text-[10px] text-foreground/60">
-                          {initiative.collected.toLocaleString()} / {initiative.goal.toLocaleString()} ₽
-                        </p>
+                        <p className="mt-1 text-[10px] text-foreground/60">{initiative.collected.toLocaleString()} / {initiative.goal.toLocaleString()} ₽</p>
                       </div>
                     )}
-                    <button className="w-full rounded-lg bg-violet-600 py-1.5 text-xs font-semibold text-white">
-                      Поддержать
-                    </button>
+                    <button className="w-full rounded-lg bg-violet-600 py-1.5 text-xs font-semibold text-white">Поддержать</button>
                   </div>
                 )
               })()}
 
-              {/* Легенда */}
               <div className="absolute bottom-4 left-4 flex flex-col gap-1.5 rounded-xl bg-background/80 p-2.5 backdrop-blur-sm border border-border">
                 {Object.entries(typeConfig).map(([key, val]) => (
                   <div key={key} className="flex items-center gap-1.5">
@@ -241,23 +374,20 @@ export default function Index() {
         )}
 
         {/* ЛЕНТА */}
-        {activeTab === "feed" && (
+        {activeScreen === "map" && activeMapTab === "feed" && (
           <div className="h-full overflow-y-auto pb-24 pt-2">
             <div className="px-4 pb-2 flex items-center gap-2 overflow-x-auto">
               {["Все", "Рядом", "Сбор средств", "Волонтёры", "Мероприятия"].map((filter) => (
                 <button
                   key={filter}
                   className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    filter === "Все"
-                      ? "bg-violet-600 text-white"
-                      : "bg-secondary text-foreground/70"
+                    filter === "Все" ? "bg-violet-600 text-white" : "bg-secondary text-foreground/70"
                   }`}
                 >
                   {filter}
                 </button>
               ))}
             </div>
-
             <div className="flex flex-col gap-3 px-4 pt-2">
               {initiatives.map((item) => {
                 const config = typeConfig[item.type as keyof typeof typeConfig]
@@ -273,14 +403,11 @@ export default function Index() {
                       </div>
                       <span className="text-[10px] text-foreground/40">{item.time}</span>
                     </div>
-
                     <h3 className="mb-1.5 text-sm font-semibold text-foreground leading-snug">{item.title}</h3>
-
                     <div className="mb-3 flex items-center gap-1 text-[11px] text-foreground/50">
                       <Icon name="MapPin" size={10} className="text-foreground/40" />
                       {item.address}
                     </div>
-
                     {item.goal > 0 && (
                       <div className="mb-3">
                         <div className="flex justify-between text-[11px] text-foreground/60 mb-1">
@@ -288,14 +415,10 @@ export default function Index() {
                           <span>из {item.goal.toLocaleString()} ₽</span>
                         </div>
                         <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-red-500 transition-all"
-                            style={{ width: `${progress}%` }}
-                          />
+                          <div className="h-full rounded-full bg-red-500 transition-all" style={{ width: `${progress}%` }} />
                         </div>
                       </div>
                     )}
-
                     {item.volunteers.needed > 0 && (
                       <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-secondary px-2.5 py-1.5">
                         <Icon name="Users" size={12} className="text-green-400" />
@@ -304,7 +427,6 @@ export default function Index() {
                         </span>
                       </div>
                     )}
-
                     <div className="flex gap-2">
                       <button className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-violet-600 py-2.5 text-xs font-semibold text-white">
                         <Icon name="Heart" size={13} />
@@ -323,14 +445,59 @@ export default function Index() {
         )}
       </div>
 
-      {/* Плавающая кнопка "Предложить инициативу" */}
-      <button
-        onClick={() => setShowNewInitiative(true)}
-        className="absolute bottom-6 right-4 z-20 flex items-center gap-2 rounded-2xl bg-violet-600 px-5 py-3.5 shadow-2xl shadow-violet-900/50 active:scale-95 transition-transform"
-      >
-        <Icon name="Plus" size={20} className="text-white" />
-        <span className="text-sm font-bold text-white">Предложить инициативу</span>
-      </button>
+      {/* Нижняя навигация */}
+      <div className="relative z-10 flex items-center bg-background/95 border-t border-border backdrop-blur-md pb-safe">
+        <button
+          onClick={() => { setActiveScreen("map"); setActiveMapTab("map") }}
+          className={`flex flex-1 flex-col items-center gap-1 py-3 transition-colors ${
+            activeScreen === "map" && activeMapTab === "map" ? "text-violet-400" : "text-foreground/40"
+          }`}
+        >
+          <Icon name="Map" size={20} />
+          <span className="text-[10px] font-medium">Карта</span>
+        </button>
+        <button
+          onClick={() => { setActiveScreen("map"); setActiveMapTab("feed") }}
+          className={`flex flex-1 flex-col items-center gap-1 py-3 transition-colors ${
+            activeScreen === "map" && activeMapTab === "feed" ? "text-violet-400" : "text-foreground/40"
+          }`}
+        >
+          <Icon name="LayoutList" size={20} />
+          <span className="text-[10px] font-medium">Лента</span>
+        </button>
+
+        {/* Центральная кнопка */}
+        <button
+          onClick={() => setShowNewInitiative(true)}
+          className="relative -top-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-xl shadow-violet-900/60 active:scale-95 transition-transform"
+        >
+          <Icon name="Plus" size={26} className="text-white" />
+        </button>
+
+        <button
+          onClick={() => setActiveScreen("profile")}
+          className={`flex flex-1 flex-col items-center gap-1 py-3 transition-colors ${
+            activeScreen === "profile" ? "text-violet-400" : "text-foreground/40"
+          }`}
+        >
+          <Icon name="Bell" size={20} />
+          <span className="text-[10px] font-medium">Уведомления</span>
+        </button>
+        <button
+          onClick={() => setActiveScreen("profile")}
+          className={`flex flex-1 flex-col items-center gap-1 py-3 transition-colors ${
+            activeScreen === "profile" ? "text-violet-400" : "text-foreground/40"
+          }`}
+        >
+          <div className="relative">
+            <Icon name="User" size={20} />
+            {activeScreen === "profile" && (
+              <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-violet-400" />
+            )}
+          </div>
+          <span className="text-[10px] font-medium">Профиль</span>
+        </button>
+      </div>
 
       {/* Модалка новой инициативы */}
       {showNewInitiative && (
@@ -342,7 +509,6 @@ export default function Index() {
                 <Icon name="X" size={22} />
               </button>
             </div>
-
             <div className="flex flex-col gap-3">
               <input
                 type="text"
@@ -358,7 +524,7 @@ export default function Index() {
                 {Object.entries(typeConfig).map(([key, val]) => (
                   <button
                     key={key}
-                    className={`flex flex-1 flex-col items-center gap-1 rounded-xl border border-border py-2.5 text-[11px] font-medium transition-colors ${val.color} bg-opacity-10 text-foreground/70`}
+                    className={`flex flex-1 flex-col items-center gap-1 rounded-xl border border-border py-2.5 text-[11px] font-medium transition-colors text-foreground/70`}
                   >
                     <div className={`flex h-7 w-7 items-center justify-center rounded-full ${val.color}`}>
                       <Icon name={val.icon} size={14} className="text-white" />
